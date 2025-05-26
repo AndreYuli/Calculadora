@@ -1,164 +1,193 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
 import 'screens/home_screen.dart';
 
 void main() {
-  runApp(const MainApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Configurar orientación y barra de estado
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  
+  // Configurar barra de estado
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+  
+  runApp(const CostoApp());
 }
 
-/// Widget principal de la aplicación.
-/// Configura el tema y la pantalla inicial.
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+/// Aplicación principal de la calculadora de costo por uso.
+class CostoApp extends StatelessWidget {
+  const CostoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Calculadora de Costo por Uso',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const HomeScreen(),
+      title: 'Costo por Uso',
       debugShowCheckedModeBanner: false,
+      theme: _buildAppTheme(),
+      home: const HomeScreen(),
     );
   }
-}
 
-/// Formulario para calcular el costo por uso.
-/// Se recomienda mover este widget a un archivo separado si crece más.
-class InputForm extends StatefulWidget {
-  const InputForm({super.key});
-
-  @override
-  State<InputForm> createState() => _InputFormState();
-}
-
-class _InputFormState extends State<InputForm> {
-  final TextEditingController priceController = TextEditingController();
-  final TextEditingController usesController = TextEditingController();
-  String? costPerUse;
-
-  /// Calcula el costo por uso y actualiza el estado.
-  void handleSubmit() {
-    final price = double.tryParse(priceController.text);
-    final uses = int.tryParse(usesController.text);
-
-    if (price != null && uses != null && uses > 0) {
-      final cost = price / uses;
-      setState(() {
-        costPerUse = cost.toStringAsFixed(2);
-      });
-    } else {
-      setState(() {
-        costPerUse = 'Datos inválidos';
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Campo para el precio del producto
-          TextField(
-            controller: priceController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Precio del producto',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Campo para el número de usos
-          TextField(
-            controller: usesController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Número de usos',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 24),
-          // Botón para calcular
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: handleSubmit,
-              child: const Text('Calcular'),
-            ),
-          ),
-          // Resultado
-          if (costPerUse != null) ...[
-            const SizedBox(height: 24),
-            Result(costPerUse: costPerUse!),
-          ],
-        ],
+  /// Tema personalizado de la aplicación
+  ThemeData _buildAppTheme() {
+    return ThemeData(
+      // Esquema de colores moderno
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.blue,
+        brightness: Brightness.light,
       ),
-    );
-  }
-}
-
-/// Widget para mostrar el resultado del cálculo.
-/// Muestra un ícono y el mensaje correspondiente.
-class Result extends StatelessWidget {
-  final String costPerUse;
-  const Result({super.key, required this.costPerUse});
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isError = costPerUse == 'Datos inválidos';
-    final String iconPath = isError
-        ? 'assets/icon-error.svg'
-        : 'assets/icon-success.svg';
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isError ? Colors.red[50] : Colors.green[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isError ? Colors.red : Colors.green,
-          width: 2,
+      
+      // Material 3
+      useMaterial3: true,
+      
+      // Tipografía personalizada
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+        displayMedium: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+        displaySmall: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+        headlineLarge: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+        headlineMedium: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+        titleLarge: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+        titleMedium: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black87,
+        ),
+        bodyLarge: TextStyle(
+          fontSize: 16,
+          color: Colors.black87,
+          height: 1.5,
+        ),
+        bodyMedium: TextStyle(
+          fontSize: 14,
+          color: Colors.black54,
+          height: 1.4,
         ),
       ),
-      child: Row(
-        children: [
-          SvgPicture.asset(
-            iconPath,
-            width: 40,
-            height: 40,
+      
+      // Tema de botones elevados
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 2,
+          shadowColor: Colors.black26,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isError ? 'Error' : 'Resultado',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: isError ? Colors.red : Colors.green[800],
-                  ),
-                ),
-                Text(
-                  isError ? 'Datos inválidos' : '\$${costPerUse}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                if (!isError)
-                  const Text(
-                    'Costo por cada uso del producto',
-                    style: TextStyle(fontSize: 12, color: Colors.black54),
-                  ),
-              ],
-            ),
+          minimumSize: const Size(0, 48),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
           ),
-        ],
+        ),
       ),
+      
+      // Tema de botones outlined
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          minimumSize: const Size(0, 48),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+      
+      // Tema de campos de texto
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.grey[50],
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.blue, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+      ),
+      
+      // Tema de AppBar
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black87),
+        titleTextStyle: TextStyle(
+          color: Colors.black87,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+        ),
+      ),
+      
+      // Tema de tarjetas
+      cardTheme: CardTheme(
+        elevation: 4,
+        shadowColor: Colors.black12,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 8),
+      ),
+      
+      // Configuración de splash
+      splashColor: Colors.blue.withOpacity(0.1),
+      highlightColor: Colors.blue.withOpacity(0.05),
     );
   }
 }
